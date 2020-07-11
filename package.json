@@ -6,6 +6,7 @@
   },
   "dependencies": {
     "@types/node": "^13.7.4",
+    "comlink": "^4.3.0",
     "firebase": "^7.9.0",
     "parcel-bundler": "^1.12.4"
   },
