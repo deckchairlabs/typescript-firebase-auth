@@ -20,8 +20,10 @@ export default (firebase: firebase.app.App) => {
   const auth = firebase.auth()
 
   self.addEventListener('fetch', async (event) => {
+    let request = event.request
+
     // Only respond to safe navigate requests, ie. document loads
-    if (event.request.mode === 'navigate' && isSafeRequest(event.request)) {
+    if (request.mode === 'navigate' && isSafeRequest(request)) {
       const currentUser = auth.currentUser
 
       if (currentUser) {
@@ -29,7 +31,7 @@ export default (firebase: firebase.app.App) => {
         console.log(token)
       }
 
-      event.respondWith(fetch(event.request))
+      event.respondWith(fetch(request))
     }
   })
 }

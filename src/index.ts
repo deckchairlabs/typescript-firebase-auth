@@ -1,11 +1,10 @@
 import * as Comlink from 'comlink'
-import { AuthApiProxy } from './types'
+import { AuthApiProxy, AuthenticatedUser } from './types'
 
 const loginForm = document.getElementById('login-form') as HTMLFormElement
-const authWorker = new Worker('./workers/auth.ts')
-const authApi = Comlink.wrap<AuthApiProxy>(authWorker)
+const authApi = Comlink.wrap<AuthApiProxy>(new Worker('./workers/auth.ts'))
 
-const onAuthStateChanged = (user: any) => {
+const onAuthStateChanged = (user: AuthenticatedUser) => {
   console.log(user)
 }
 

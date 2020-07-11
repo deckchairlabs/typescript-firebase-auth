@@ -1,5 +1,3 @@
-declare var self: DedicatedWorkerGlobalScope
-
 import * as firebase from 'firebase/app'
 import 'firebase/auth'
 import * as Comlink from 'comlink'
@@ -11,15 +9,23 @@ const auth = firebaseApp.auth()
 
 const api: AuthApiProxy = {
   onAuthStateChanged(callback) {
-    auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged(async (user) => {
       if (user) {
+        const token = await user.getIdToken()
         callback({
-          uid: user.uid,
+          token,
+          id: user.uid,
           email: user.email,
           displayName: user.displayName,
         })
       }
     })
+  },
+  async signInWithEmail(email: string, redirectUrl: string) {
+    await auth.sendSignInLinkToEmail(email, {
+      url: redirectUrl,
+    })
+    return true
   },
   async signInWithEmailAndPassword(email: string, password: string) {
     const result = await auth.signInWithEmailAndPassword(email, password)
@@ -31,6 +37,10 @@ const api: AuthApiProxy = {
         displayName: result.user.displayName,
       }
     }
+  },
+  async signOut() {
+    await auth.signOut()
+    return true
   },
 }
 
