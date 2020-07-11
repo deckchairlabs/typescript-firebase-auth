@@ -3,10 +3,13 @@ declare var self: ServiceWorkerGlobalScope
 import * as firebase from 'firebase/app'
 import 'firebase/auth'
 import * as Comlink from 'comlink'
+import firebaseAuth from './serviceWorker/firebaseAuth'
 import { firebaseConfig } from './config'
 import { ControllerProxyApi } from './types'
 
 const firebaseApp = firebase.initializeApp(firebaseConfig)
+
+firebaseAuth(firebaseApp)
 
 const api: ControllerProxyApi = {
   onAuthStateChanged(callback) {
