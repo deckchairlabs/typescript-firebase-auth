@@ -20,16 +20,16 @@ export default (firebase: firebase.app.App) => {
   const auth = firebase.auth()
 
   self.addEventListener('fetch', async (event) => {
-    let request = event.request
-
-    if (isSafeRequest(request)) {
+    // Only respond to safe navigate requests, ie. document loads
+    if (event.request.mode === 'navigate' && isSafeRequest(event.request)) {
       const currentUser = auth.currentUser
 
       if (currentUser) {
         const token = await currentUser.getIdToken()
+        console.log(token)
       }
-    }
 
-    event.respondWith(fetch(request))
+      event.respondWith(fetch(event.request))
+    }
   })
 }

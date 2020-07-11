@@ -1,53 +1,33 @@
 import * as Comlink from 'comlink'
-import { ControllerProxyApi } from './types'
+import { AuthApiProxy } from './types'
 
 const loginForm = document.getElementById('login-form') as HTMLFormElement
+const authWorker = new Worker('./workers/auth.ts')
+const authApi = Comlink.wrap<AuthApiProxy>(authWorker)
 
 const onAuthStateChanged = (user: any) => {
   console.log(user)
 }
 
-const main = async (controller: ServiceWorker) => {
-  const { port1, port2 } = new MessageChannel()
+authApi.onAuthStateChanged(Comlink.proxy(onAuthStateChanged))
 
-  const message = {
-    comlinkInit: true,
-    port: port1,
-  }
+loginForm.addEventListener('submit', async function (event) {
+  event.preventDefault()
 
-  controller.postMessage(message, [port1])
-  const controllerProxy = Comlink.wrap<ControllerProxyApi>(port2)
+  const emailInput = this.elements.namedItem('email') as HTMLInputElement
+  const passwordInput = this.elements.namedItem('password') as HTMLInputElement
 
-  controllerProxy.onAuthStateChanged(Comlink.proxy(onAuthStateChanged))
+  if (emailInput && passwordInput) {
+    const result = await authApi.signInWithEmailAndPassword(
+      emailInput.value,
+      passwordInput.value
+    )
 
-  try {
-    loginForm.addEventListener('submit', async function (event) {
-      event.preventDefault()
+    console.log(result)
 
-      const emailInput = this.elements.namedItem('email') as HTMLInputElement
-      const passwordInput = this.elements.namedItem(
-        'password'
-      ) as HTMLInputElement
-
-      if (emailInput && passwordInput) {
-        const result = await controllerProxy.signInWithEmailAndPassword(
-          emailInput.value,
-          passwordInput.value
-        )
-
-        console.log(result)
-
-        // window.location.assign('/')
-        return false
-      }
-    })
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-navigator.serviceWorker.register('./service-worker.ts').then((registration) => {
-  if (registration.active) {
-    main(registration.active)
+    // window.location.assign('/')
+    return false
   }
 })
+
+navigator.serviceWorker.register('./service-worker.ts')
